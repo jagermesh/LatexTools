@@ -34,13 +34,11 @@ composer require jagermesh/latex-tools
   // Or library directly
   // require_once('LatexTools.php');
 
-  $latexTools = new LatexTools();
+  $latexTools = new \LatexTools\LatexTools();
   $latexTools->renderIntoResponse('(\frac{\beta }{\mu})^\beta {\Gamma(\beta )} \,  e^{-\frac{V\,\beta }{\mu }} \label{gamma}');
 ```
 
 Will render this nice formula :)
-
-![](demo/demo.png)
 
 ## Functions reference
 
@@ -81,8 +79,9 @@ Example
 
 ```php
 <?php
-  require_once(__DIR__ . 'LatexTools.php');
-  $latexTools = new LatexTools();
+  require_once(__DIR__ . '/vendor/autoload.php');
+
+  $latexTools = new \LatexTools\LatexTools();
   $latexTools->renderIntoResponse('x^2');
 ```
 

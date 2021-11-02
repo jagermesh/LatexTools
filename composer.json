@@ -14,8 +14,8 @@
     "php": ">=5.3"
   },
   "autoload": {
-    "psr-0": {
-        "LatexTools": "src/"
+    "psr-4": {
+        "LatexTools\\": "src/"
     }
   }
 }

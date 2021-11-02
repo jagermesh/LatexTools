@@ -1,6 +1,10 @@
 <?php
 
-class LatexTools {
+namespace LatexTools;
+
+class LatexTools
+{
+  const PRE_FORMATTED_MESSAGE = '<pre>%s</pre>';
 
   private $pathToLatexTool = '';
   private $pathToDviPngTool = '';
@@ -13,34 +17,30 @@ class LatexTools {
   private $fallbackImageFontName = __DIR__ . '/fonts/PT_Serif-Web-Regular.ttf';
   private $fallbackImageFontSize = 16;
 
-  function __construct($params = array()) {
-
+  public function __construct($params = [])
+  {
     if (array_key_exists('pathToLatexTool', $params) && file_exists($params['pathToLatexTool'])) {
       $this->pathToLatexTool = $params['pathToLatexTool'];
-    } else
-    if (file_exists('/Library/TeX/texbin/latex')) {
+    } elseif (file_exists('/Library/TeX/texbin/latex')) {
       // Mac OS
       $this->pathToLatexTool = '/Library/TeX/texbin/latex';
-    } else
-    if (file_exists('/usr/bin/latex')) {
+    } elseif (file_exists('/usr/bin/latex')) {
       // linux
       $this->pathToLatexTool = '/usr/bin/latex';
     } else {
-      throw new Exception('latex not installed');
+      throw new LatexToolsException('latex not installed');
     }
 
     if (array_key_exists('pathToDviPngTool', $params) && file_exists($params['pathToDviPngTool'])) {
       $this->pathToDviPngTool = $params['pathToDviPngTool'];
-    } else
-    if (file_exists('/Library/TeX/texbin/dvipng')) {
+    } elseif (file_exists('/Library/TeX/texbin/dvipng')) {
       // Mac OS
       $this->pathToDviPngTool = '/Library/TeX/texbin/dvipng';
-    } else
-    if (file_exists('/usr/bin/dvipng')) {
+    } elseif (file_exists('/usr/bin/dvipng')) {
       // linux
       $this->pathToDviPngTool = '/usr/bin/dvipng';
     } else {
-      throw new Exception('dvipng not installed');
+      throw new LatexToolsException('dvipng not installed');
     }
 
     if (array_key_exists('cachePath', $params)) {
@@ -66,77 +66,76 @@ class LatexTools {
     if (array_key_exists('fallbackImageFontSize', $params)) {
       $this->fallbackImageFontSize = $params['fallbackImageFontSize'];
     }
-
   }
 
-  private function assembleParams($params = array()) {
-
+  private function assembleParams($params = [])
+  {
     $result = $params;
+
     if (!is_array($result)) {
-      $result = array();
+      $result = [];
     }
-    $result['density']               = array_key_exists('density', $result) ? $result['density'] : $this->density;
-    $result['fallbackToImage']       = array_key_exists('fallbackToImage', $result) ? $result['fallbackToImage'] : $this->fallbackToImage;
+
+    $result['density'] = array_key_exists('density', $result) ? $result['density'] : $this->density;
+    $result['fallbackToImage'] = array_key_exists('fallbackToImage', $result) ? $result['fallbackToImage'] : $this->fallbackToImage;
     $result['fallbackImageFontName'] = array_key_exists('fallbackImageFontName', $result) ? $result['fallbackImageFontName'] : $this->fallbackImageFontName;
     $result['fallbackImageFontSize'] = array_key_exists('fallbackImageFontSize', $result) ? $result['fallbackImageFontSize'] : $this->fallbackImageFontSize;
-    $result['checkOnly']             = array_key_exists('checkOnly', $result) ? $result['checkOnly'] : false;
-    $result['debug']                 = array_key_exists('debug', $result) ? $result['debug'] : false;
+    $result['checkOnly'] = array_key_exists('checkOnly', $result) ? $result['checkOnly'] : false;
+    $result['debug'] = array_key_exists('debug', $result) ? $result['debug'] : false;
 
     if ($result['checkOnly']) {
       $result['fallbackToImage'] = false;
     }
 
     return $result;
-
   }
 
-  private function getFormulaHash($formula, $params = array()) {
-
+  private function getFormulaHash($formula, $params = [])
+  {
     $params = $this->assembleParams($params);
-    $result = md5($formula . '|' . serialize($params));
-
-    return $result;
-
+    return hash('sha256', $formula . '|' . serialize($params));
   }
 
-  private function HtmlToText($html) {
+  private function htmlToText($html)
+  {
+    $result = $html;
 
-    $html = preg_replace('~<!DOCTYPE[^>]*?>~ism', '', $html);
-    $html = preg_replace('~<head[^>]*?>.*?</head>~ism', '', $html);
-    $html = preg_replace('~<style[^>]*?>.*?</style>~ism', '', $html);
-    $html = preg_replace('~<script[^>]*?>.*?</script>~ism', '', $html);
-    $html = preg_replace('~&nbsp;~ism', ' ', $html);
-    $html = preg_replace("~<br[^>]*>[\n]+~ism", "\n", $html);
-    $html = preg_replace("~<br[^>]*>~ism", "\n", $html);
-    $html = preg_replace('~<[A-Z][^>]*?>~ism', '', $html);
-    $html = preg_replace('~<\/[A-Z][^>]*?>~ism', '', $html);
-    $html = preg_replace('~<!--.*?-->~ism', ' ', $html);
-    $html = preg_replace('~^[ ]+$~ism', '', $html);
-    $html = preg_replace('~^[ ]+~ism', '', $html);
-    $html = preg_replace("~^(\n\r){2,}~ism", "\n", $html);
-    $html = preg_replace("~^(\r\n){2,}~ism", "\n", $html);
-    $html = preg_replace("~^(\n){2,}~ism", "\n", $html);
-    $html = preg_replace("~^(\r){2,}~ism", "\n", $html);
+    $result = preg_replace('~<!DOCTYPE[^>]*?>~ism', '', $result);
+    $result = preg_replace('~<head[^>]*?>.*?</head>~ism', '', $result);
+    $result = preg_replace('~<style[^>]*?>.*?</style>~ism', '', $result);
+    $result = preg_replace('~<script[^>]*?>.*?</script>~ism', '', $result);
+    $result = preg_replace('~&nbsp;~ism', ' ', $result);
+    $result = preg_replace("~<br[^>]*>[\n]+~ism", "\n", $result);
+    $result = preg_replace("~<br[^>]*>~ism", "\n", $result);
+    $result = preg_replace('~<[A-Z][^>]*?>~ism', '', $result);
+    $result = preg_replace('~<\/[A-Z][^>]*?>~ism', '', $result);
+    $result = preg_replace('~<!--.*?-->~ism', ' ', $result);
+    $result = preg_replace('~^[ ]+$~ism', '', $result);
+    $result = preg_replace('~^[ ]+~ism', '', $result);
+    $result = preg_replace("~^(\n\r){2,}~ism", "\n", $result);
+    $result = preg_replace("~^(\r\n){2,}~ism", "\n", $result);
+    $result = preg_replace("~^(\n){2,}~ism", "\n", $result);
+    $result = preg_replace("~^(\r){2,}~ism", "\n", $result);
 
     $flags = ENT_COMPAT;
+
     if (defined('ENT_HTML401')) {
       $flags = $flags | ENT_HTML401;
     }
-    $html = html_entity_decode($html, $flags, 'UTF-8');
+    $result = html_entity_decode($result, $flags, 'UTF-8');
 
-    return trim($html);
-
+    return trim($result);
   }
 
-  private function renderSimpleImage($formula, $params = array()) {
-
+  private function renderSimpleImage($formula, $params = [])
+  {
     $params = $this->assembleParams($params);
     $params['format'] = 'fallback';
 
-    $formula = $this->HtmlToText($formula);
+    $formula = $this->htmlToText($formula);
 
-    $formula = str_replace('\\ ', ' ' , $formula);
-    $formula = str_replace('\\\\', "\n" , $formula);
+    $formula = str_replace('\\ ', ' ', $formula);
+    $formula = str_replace('\\\\', "\n", $formula);
 
     $formulaHash = $this->getFormulaHash($formula, $params);
 
@@ -150,9 +149,8 @@ class LatexTools {
     if (file_exists($outputFile)) {
       return $outputFile;
     } else {
-
       if (!function_exists('imagettfbbox')) {
-        throw new Exception('GD library not installed');
+        throw new LatexToolsException('GD library not installed');
       }
 
       $fontSize = $params['fallbackImageFontSize'];
@@ -162,14 +160,14 @@ class LatexTools {
 
       if ($box = @imagettfbbox($fontSize, 0, $fontName, $formula)) {
         $deltaY = abs($box[5]) + 2;
-        $width  = $box[2];
+        $width = $box[2];
         $height = $box[1] + $deltaY + 4;
 
         $image = imagecreatetruecolor($width, $height);
 
         try {
           if (!@imagesavealpha($image, true)) {
-            throw new Exception('Alpha channel not supported');
+            throw new LatexToolsException('Alpha channel not supported');
           }
 
           $transparentColor = imagecolorallocatealpha($image, 0, 0, 0, 127);
@@ -181,99 +179,86 @@ class LatexTools {
           $retval = @imagettftext($image, $fontSize, 0, 0, $deltaY, $black, $fontName, $formula);
 
           if (!$retval) {
-            throw new Exception('Can not render formula using provided font');
+            throw new LatexToolsException('Can not render formula using provided font');
           }
 
           $retval = @imagepng($image, $outputFile);
 
           if (!$retval || !file_exists($outputFile) || (0 === filesize($outputFile))) {
-            throw new Exception('Can not save output image');
+            throw new LatexToolsException('Can not save output image');
           }
         } finally {
           imagedestroy($image);
         }
       } else {
-        throw new Exception('Font ' . $fontName . ' not found');
+        throw new LatexToolsException('Font ' . $fontName . ' not found');
       }
 
       return $outputFile;
-
     }
-
   }
 
-  private function checkImages($formula) {
+  private function processImages($formula)
+  {
+    $result = ['formula' => $formula, 'tempFiles' => []];
 
-    return preg_match('/\\includegraphics[{]([^:]+?):data:image\/([a-z]+);base64,([^}]+?)[}]/ism', $formula);
-
-  }
-
-  private function processImages($formula) {
-
-    $result = ['formula' => $formula, 'tempFiles' => [] ];
-
-    while(preg_match('/[\\\]includegraphics[{].*?data:image\/([a-z]+);base64,([^}]+?)[}]/ism', $result['formula'], $matches)) {
+    while (preg_match('/[\\\]includegraphics[{].*?data:image\/([a-z]+);base64,([^}]+?)[}]/ism', $result['formula'], $matches)) {
       try {
-        // throw new \Exception('a');
         $imageType = $matches[1];
         $packedImage = $matches[2];
-        $fileName = md5($packedImage) . '.' . $imageType;
+        $fileName = hash('sha256', $packedImage) . '.' . $imageType;
         $filePath = $this->getTempPath() . $fileName;
         if (file_put_contents($filePath, base64_decode($packedImage))) {
           $result['tempFiles'][] = $filePath;
           if ($image = @imagecreatefrompng($filePath)) {
             $imageWidth = imagesx($image);
             $imageHeight = imagesy($image);
-            $result['formula'] = str_replace($matches[0], '\includegraphics[natwidth=' . $imageWidth . ',natheight=' . $imageHeight . ']{' . $filePath . '}\\\\', $result['formula']);
+            $result['formula'] = str_replace(
+              $matches[0],
+              '\includegraphics[natwidth=' . $imageWidth . ',natheight=' . $imageHeight . ']{' . $filePath . '}\\\\', $result['formula']
+            );
           } else {
-            throw new Exception('Error');
+            throw new LatexToolsException('Error');
           }
         } else {
-          throw new Exception('Error');
+          throw new LatexToolsException('Error');
         }
-      } catch (Exception $e) {
+      } catch (\Exception $e) {
         $result['formula'] = str_replace($matches[0], '', $result['formula']);
       }
     }
 
-    // debug($result['formula']);exit();
-
     return $result;
-
   }
 
-  private function render($formula, $params = array()) {
-
+  private function render($formula, $params = [])
+  {
     $params = $this->assembleParams($params);
     $params['format'] = 'image';
 
-    $formula = iconv("UTF-8","ISO-8859-1//IGNORE", $formula);
-    $formula = iconv("ISO-8859-1","UTF-8", $formula);
+    $formula = iconv("UTF-8", "ISO-8859-1//IGNORE", $formula);
+    $formula = iconv("ISO-8859-1", "UTF-8", $formula);
 
     $formula = str_replace('\\text{img_}', '', $formula);
-    $formula = str_replace('´', "'" , $formula);
+    $formula = str_replace('´', "'", $formula);
 
     $images = $this->processImages($formula);
 
-    // exit();
-
-    $formula   = $images['formula'];
+    $formula = $images['formula'];
     $tempFiles = $images['tempFiles'];
 
     $formula = str_replace('#', '\\#', $formula);
 
-    // $formula = wordwrap($formula, 256, '\\\\ ');
-
-    $latexDocument  = '';
+    $latexDocument = '';
     $latexDocument .= '\documentclass{article}' . "\n";
     $latexDocument .= '\usepackage%' . "\n" .
-                      '[%' . "\n" .
-                      'left=0cm,' . "\n" .
-                      'right=0cm,' . "\n" .
-                      'top=0cm,' . "\n" .
-                      'bottom=0cm,' . "\n" .
-                      'a5paper' . "\n" .
-                      ']{geometry}' . "\n";
+      '[%' . "\n" .
+      'left=0cm,' . "\n" .
+      'right=0cm,' . "\n" .
+      'top=0cm,' . "\n" .
+      'bottom=0cm,' . "\n" .
+      'a5paper' . "\n" .
+      ']{geometry}' . "\n";
     $latexDocument .= '\usepackage[utf8]{inputenc}' . "\n";
     $latexDocument .= '\usepackage{amsmath}' . "\n";
     $latexDocument .= '\usepackage{amsfonts}' . "\n";
@@ -289,20 +274,20 @@ class LatexTools {
     $latexDocuments = [];
     if (count($images['tempFiles']) < 2) {
       $latexDocuments[] = $latexDocument . "\n" .
-                                           trim($formula) . "\n" .
-                                           '\end{document}'."\n";
+        trim($formula) . "\n" .
+        '\end{document}' . "\n";
     }
     $latexDocuments[] = $latexDocument . "\n" .
-                                         '\begin{gather*}' . "\n" .
-                                         trim($formula) . "\n" .
-                                         '\end{gather*}' . "\n" .
-                                         '\end{document}'."\n";
+      '\begin{gather*}' . "\n" .
+      trim($formula) . "\n" .
+      '\end{gather*}' . "\n" .
+      '\end{document}' . "\n";
 
     $exception = null;
 
-    foreach($latexDocuments as $latexDocument) {
+    foreach ($latexDocuments as $latexDocument) {
       if ($params['debug']) {
-        echo('<pre>' . $latexDocument . '</pre>');
+        echo sprintf(self::PRE_FORMATTED_MESSAGE, $latexDocument);
       }
 
       $formulaHash = $this->getFormulaHash($latexDocument, $params);
@@ -332,10 +317,10 @@ class LatexTools {
         $dviFileName = 'latex-' . $formulaHash . '.dvi';
         $dviFile = $this->getTempPath() . $dviFileName;
         $tempFiles[] = $dviFile;
-// echo($latexDocument . '<br /><br />');exit();
+
         try {
           if (@file_put_contents($tempFile, $latexDocument) === false) {
-            throw new Exception('Can not create temporary formula file at ' . $tempFile);
+            throw new LatexToolsException('Can not create temporary formula file at ' . $tempFile);
           }
 
           try {
@@ -344,47 +329,39 @@ class LatexTools {
             $retval = '';
 
             if ($params['debug']) {
-              echo('<pre>' . $formula . '</pre>');
-              echo('<pre>' . $command . '</pre>');
+              echo sprintf(self::PRE_FORMATTED_MESSAGE, $formula);
+              echo sprintf(self::PRE_FORMATTED_MESSAGE, $command);
             }
 
             exec($command, $output, $retval);
 
             if ($params['debug']) {
-              echo('<pre>');
-              print_r($output);
-              echo('</pre>');
+              echo sprintf(self::PRE_FORMATTED_MESSAGE, json_encode($output, JSON_PRETTY_PRINT));
             }
 
             $output = join('\n', $output);
 
             if (($retval > 0) || preg_match('/Emergency stop/i', $output) || !file_exists($dviFile) || (0 === filesize($dviFile))) {
-              throw new Exception('Can not compile LaTeX formula');
+              throw new LatexToolsException('Can not compile LaTeX formula');
             }
-
-          } catch (Exception $e) {
-            $error = $e;
+          } catch (\Exception $e) {
             continue;
           }
 
           $command = $this->pathToDviPngTool . ' -q ' . $params['density'] . ' -o ' . $outputFile . ' ' . $dviFile;
 
-          $retries = 10;
-
           $output = '';
           $retval = '';
 
           if ($params['debug']) {
-            echo('<pre>' . $command . '</pre>');
+            echo sprintf(self::PRE_FORMATTED_MESSAGE, $command);
           }
 
           exec($command, $output, $retval);
 
-          if (($retval > 0) || !file_exists($outputFile) || (0 === filesize($outputFile))) {
-            if (!file_exists($outputFile) || (0 === filesize($outputFile))) {
-              $exception = new Exception('Can not convert DVI file to PNG');
-              continue;
-            }
+          if ((($retval > 0) || !file_exists($outputFile) || (0 === filesize($outputFile))) && (!file_exists($outputFile) || (0 === filesize($outputFile)))) {
+            $exception = new LatexToolsException('Can not convert DVI file to PNG');
+            continue;
           }
 
           if ($params['debug']) {
@@ -393,9 +370,9 @@ class LatexTools {
 
           return $outputFile;
         } finally {
-          foreach($tempFiles as $tempFile) {
+          foreach ($tempFiles as $tempFile) {
             if (file_exists($tempFile)) {
-              // @unlink($tempFile);
+              @unlink($tempFile);
             }
           }
         }
@@ -407,36 +384,30 @@ class LatexTools {
     } else {
       throw $exception;
     }
-
   }
 
-  public function isValidLaTeX($formula) {
-
+  public function isValidLaTeX($formula)
+  {
     try {
       $this->check($formula);
       return true;
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       return false;
     }
-
   }
 
-  public function check($formula) {
-
+  public function check($formula)
+  {
     return $this->render($formula, ['checkOnly' => true]);
-
   }
 
-  public function renderIntoFile($formula, $params = array()) {
-
-    $imageFile = $this->render($formula, $params);
-
-    return $imageFile;
-
+  public function renderIntoFile($formula, $params = [])
+  {
+    return $this->render($formula, $params);
   }
 
-  public function renderIntoResponse($formula, $params = array()) {
-
+  public function renderIntoResponse($formula, $params = [])
+  {
     $imageFile = $this->render($formula, $params);
 
     $debug = isset($params['debug']) && $params['debug'];
@@ -447,17 +418,15 @@ class LatexTools {
 
       readfile($imageFile);
     }
-
   }
 
-  public function setCachePath($value) {
-
+  public function setCachePath($value)
+  {
     $this->cachePath = rtrim($value, '/') . '/';
-
   }
 
-  public function makeDir($path, $access = 0777) {
-
+  public function makeDir($path, $access = 0777)
+  {
     if (file_exists($path)) {
       return true;
     }
@@ -467,11 +436,10 @@ class LatexTools {
     } catch (\Exception $e) {
       return false;
     }
-
   }
 
-  public function getCachePath() {
-
+  public function getCachePath()
+  {
     if ($this->cachePath) {
       $result = $this->cachePath;
     } else {
@@ -485,7 +453,7 @@ class LatexTools {
     if (!is_dir($result) || !is_writable($result)) {
       $result = rtrim(sys_get_temp_dir(), '/') . '/';
       if ($this->cachePath) {
-        $result .= md5($this->cachePath) . '/';
+        $result .= hash('sha256', $this->cachePath) . '/';
       }
     }
 
@@ -494,17 +462,15 @@ class LatexTools {
     }
 
     return $result;
-
   }
 
-  public function setTempPath($value) {
-
+  public function setTempPath($value)
+  {
     $this->tempPath = rtrim($value, '/') . '/';
-
   }
 
-  public function getTempPath() {
-
+  public function getTempPath()
+  {
     if ($this->tempPath) {
       $result = $this->tempPath;
     } else {
@@ -518,7 +484,7 @@ class LatexTools {
     if (!is_dir($result) || !is_writable($result)) {
       $result = rtrim(sys_get_temp_dir(), '/') . '/';
       if ($this->tempPath) {
-        $result .= md5($this->tempPath) . '/';
+        $result .= hash('sha256', $this->tempPath) . '/';
       }
     }
 
@@ -527,55 +493,45 @@ class LatexTools {
     }
 
     return $result;
-
   }
 
-  public function setFallbackToImage($value) {
-
+  public function setFallbackToImage($value)
+  {
     $this->fallbackToImage = $value;
-
   }
 
-  public function getFallbackToImage() {
-
+  public function getFallbackToImage()
+  {
     return $this->fallbackToImage;
-
   }
 
-  public function setFallbackImageFontName($value) {
-
+  public function setFallbackImageFontName($value)
+  {
     $this->fallbackImageFontName = $value;
-
   }
 
-  public function getFallbackImageFontName() {
-
+  public function getFallbackImageFontName()
+  {
     return $this->fallbackImageFontName;
-
   }
 
-  public function setFallbackImageFontSize($value) {
-
+  public function setFallbackImageFontSize($value)
+  {
     $this->fallbackImageFontSize = $value;
-
   }
 
-  public function getFallbackImageFontSize() {
-
+  public function getFallbackImageFontSize()
+  {
     return $this->fallbackImageFontSize;
-
   }
 
-  public function setDensity($value) {
-
+  public function setDensity($value)
+  {
     $this->density = $value;
-
   }
 
-  public function getDensity() {
-
+  public function getDensity()
+  {
     return $this->density;
-
   }
-
 }

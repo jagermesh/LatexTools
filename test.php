@@ -1,7 +1,6 @@
 <?php
 
-require_once(dirname(__DIR__) . '/src/LatexTools.php');
+require_once(__DIR__ . '/vendor/autoload.php');
 
-$latexTools = new LatexTools();
+$latexTools = new \LatexTools\LatexTools();
 $latexTools->renderIntoResponse('(\frac{\beta }{\mu})^\beta {\Gamma(\beta )} \,  e^{-\frac{V\,\beta }{\mu }} \label{gamma}');
-
