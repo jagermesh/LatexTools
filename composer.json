@@ -2,20 +2,18 @@
   "name": "jagermesh/latex-tools",
   "type": "library",
   "description": "Library to render LaTeX formula into image",
-  "keywords": [ "LaTeX", "TexLive", "MacTex" ],
+  "keywords": ["LaTeX", "TexLive", "MacTex"],
   "license": "MIT",
-  "authors": [
-    {
-      "name": "Sergiy Lavryk",
-      "email": "jagermesh@gmail.com"
-    }
-  ],
+  "authors": [{
+    "name": "Sergiy Lavryk",
+    "email": "jagermesh@gmail.com"
+  }],
   "require": {
     "php": ">=5.3"
   },
   "autoload": {
     "psr-4": {
-        "LatexTools\\": "src/"
+      "LatexTools\\": "src/"
     }
   }
 }

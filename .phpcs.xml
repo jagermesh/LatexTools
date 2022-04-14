@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="PSR12" xsi:noNamespaceSchemaLocation="../../../phpcs.xsd">
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="PSR12-Mod" xsi:noNamespaceSchemaLocation="../../../phpcs.xsd">
     <description>The PSR-12 coding standard.</description>
     <arg name="tab-width" value="4"/>
 
@@ -8,10 +8,8 @@
     <!-- 2.1 Basic Coding Standard -->
 
     <!-- Code MUST follow all rules outlined in PSR-1. -->
-    <rule ref="PSR1" />
-<!--         <exclude name="Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace"/>
-    </rule>
- -->
+    <rule ref="PSR1"/>
+
     <!-- The term 'StudlyCaps' in PSR-1 MUST be interpreted as PascalCase where the first letter of each word is capitalized including the very first letter. -->
 
     <!-- 2.2 Files -->
@@ -125,6 +123,7 @@
     <!-- Opening braces MUST be on their own line and MUST NOT be preceded or followed by a blank line. -->
     <!-- Closing braces MUST be on their own line and MUST NOT be preceded by a blank line. -->
     <!-- Lists of implements and, in the case of interfaces, extends MAY be split across multiple lines, where each subsequent line is indented once. When doing so, the first item in the list MUST be on the next line, and there MUST be only one interface per line. -->
+    <!-- checked by PSR12.Classes.OpeningBraceSpace -->
     <rule ref="PSR2.Classes.ClassDeclaration"/>
 
     <!-- 4.2 Using traits -->
@@ -203,6 +202,7 @@
     <!-- Argument lists MAY be split across multiple lines, where each subsequent line is indented once. When doing so, the first item in the list MUST be on the next line, and there MUST be only one argument per line. A single argument being split across multiple lines (as might be the case with an anonymous function or array) does not constitute splitting the argument list itself. -->
     <rule ref="Generic.Functions.FunctionCallArgumentSpacing"/>
 
+    <!-- eDoctrina - disabled rule -->
     <!-- <rule ref="PSR2.Methods.FunctionCallSignature"/> -->
 
     <rule ref="PSR2.Methods.FunctionCallSignature.SpaceAfterCloseBracket">
@@ -223,9 +223,7 @@
     The body MUST be on the next line after the opening brace
     The closing brace MUST be on the next line after the body
     The body of each structure MUST be enclosed by braces. This standardizes how the structures look and reduces the likelihood of introducing errors as new lines get added to the body. -->
-
-    <!-- <rule ref="Squiz.ControlStructures.ControlSignature"/> -->
-
+    <rule ref="Squiz.ControlStructures.ControlSignature"/>
     <rule ref="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen"/>
     <rule ref="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose"/>
     <rule ref="Squiz.WhiteSpace.ScopeClosingBrace"/>
@@ -255,8 +253,7 @@
     <!-- checked by Squiz.ControlStructures.ControlSignature included above -->
 
     <!-- The keyword elseif SHOULD be used instead of else if so that all control keywords look like single words. -->
-
-    <!-- <rule ref="PSR2.ControlStructures.ElseIfDeclaration"/> -->
+    <rule ref="PSR2.ControlStructures.ElseIfDeclaration"/>
 
     <!-- Expressions in parentheses MAY be split across multiple lines, where each subsequent line is indented at least once. When doing so, the first condition MUST be on the next line. The closing parenthesis and opening brace MUST be placed together on their own line with one space between them. Boolean operators between conditions MUST always be at the beginning or at the end of the line, not a mix of both. -->
     <!-- checked by PSR12.ControlStructures.ControlStructureSpacing -->
@@ -267,6 +264,7 @@
 
     <!-- The case statement MUST be indented once from switch, and the break keyword (or other terminating keywords) MUST be indented at the same level as the case body. There MUST be a comment such as // no break when fall-through is intentional in a non-empty case body. -->
 
+    <!-- eDoctrina - disabled rule -->
     <!-- <rule ref="PSR2.ControlStructures.SwitchDeclaration"/> -->
 
     <!-- Expressions in parentheses MAY be split across multiple lines, where each subsequent line is indented at least once. When doing so, the first condition MUST be on the next line. The closing parenthesis and opening brace MUST be placed together on their own line with one space between them. Boolean operators between conditions MUST always be at the beginning or at the end of the line, not a mix of both. -->
@@ -351,6 +349,7 @@
     <!-- The opening brace MAY be on the same line as the class keyword so long as the list of implements interfaces does not wrap. If the list of interfaces wraps, the brace MUST be placed on the line immediately following the last interface. -->
     <!-- checked by PSR12.Classes.AnonClassDeclaration -->
 
+    <!-- eDoctrina - added rule -->
     <rule ref="Generic.WhiteSpace.ScopeIndent">
         <properties>
             <property name="indent" value="2"/>
